@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Optional
 
 import pandas as pd
-import vaex
 import wget
 
 from src.settings import ID_COLUMN, SUBJECT_ID_COLUMN, TARGET_COLUMN, TEXT_COLUMN
@@ -370,7 +369,7 @@ class TextPreprocessor:
         self.remove_brackets = remove_brackets
         self.convert_danish_characters = convert_danish_characters
 
-    def __call__(self, df: vaex.dataframe.DataFrame) -> vaex.dataframe.DataFrame:
+    def __call__(self, df):
         if self.lower:
             df[TEXT_COLUMN] = df[TEXT_COLUMN].str.lower()
         if self.convert_danish_characters:
@@ -400,12 +399,9 @@ class TextPreprocessor:
         return df
 
 
-def preprocess_documents(
-    df: pd.DataFrame, preprocessor: TextPreprocessor
-) -> pd.DataFrame:
-    with vaex.cache.memory_infinite():  # pylint: disable=not-context-manager
-        df = vaex.from_pandas(df)
-        df = preprocessor(df)
-        df["num_words"] = df.text.str.count(" ") + 1
-        df["num_targets"] = df[TARGET_COLUMN].apply(len)
-        return df.to_pandas_df()
+def preprocess_documents(df: pd.DataFrame, preprocessor: TextPreprocessor) -> pd.DataFrame:
+    df = df.copy()
+    df[TEXT_COLUMN] = df[TEXT_COLUMN].apply(preprocessor)
+    df['num_words'] = df[TEXT_COLUMN].str.count(' ') + 1
+    df['num_targets'] = df[TARGET_COLUMN].apply(len)
+    return df

@@ -137,3 +137,5 @@ data_analysis/files
 # wandb
 wandb
 outputs
+**/__pycache__/*
+
