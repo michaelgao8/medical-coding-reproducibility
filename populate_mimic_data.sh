@@ -18,6 +18,8 @@ MIMICIV_DIR="./mimicdata/mimiciv/"
 # Create download directories if they don't exist
 mkdir -p $MIMICIII_DIR
 mkdir -p $MIMICIV_DIR
+mkdir -p $MIMICIV_DIR/note  # Add this line to create the 'note' subdirectory
+mkdir -p $MIMICIV_DIR/hosp  # Add this line to create the 'hosp' subdirectory
 
 # Lists of files to download
 MIMICIII_FILES=(
@@ -28,6 +30,7 @@ MIMICIII_FILES=(
     "D_ICD_DIAGNOSES.csv.gz"
     "ADMISSIONS.csv.gz"
     "PATIENTS.csv.gz"
+    "CPTEVENTS.csv.gz"
 )
 
 MIMICIV_FILES=(
@@ -42,7 +45,7 @@ MIMICIV_NOTE_FILES=(
 # Base URLs for MIMIC-III and MIMIC-IV files
 MIMICIII_BASE_URL="https://physionet.org/files/mimiciii/1.4"
 MIMICIV_BASE_URL="https://physionet.org/files/mimiciv/2.2"
-MIMICIV_NOTE_BASE_URL="https://physionet.org/files/mimic-iv-note/2.2/"
+MIMICIV_NOTE_BASE_URL="https://physionet.org/files/mimic-iv-note/2.2"
 
 # Function to download a list of files to a specified directory
 download_files() {
@@ -50,18 +53,18 @@ download_files() {
     local FILES=("${!2}")
     local DEST_DIR=$3
 
-    cd $DEST_DIR
-
     for FILE in "${FILES[@]}"; do
-        wget --user=$PHYSIONET_USER --password=$PHYSIONET_PASSWORD $BASE_URL/$FILE
+        local FULL_DEST_DIR="$DEST_DIR/$(dirname "$FILE")"
+        mkdir -p "$FULL_DEST_DIR"
+        wget --user=$PHYSIONET_USER --password=$PHYSIONET_PASSWORD -P "$FULL_DEST_DIR" $BASE_URL/$FILE
     done
 }
 
 # Download MIMIC-III files
-#download_files $MIMICIII_BASE_URL MIMICIII_FILES[@] $MIMICIII_DIR
+download_files $MIMICIII_BASE_URL MIMICIII_FILES[@] $MIMICIII_DIR
 
 # Download MIMIC-IV files
-#download_files $MIMICIV_BASE_URL MIMICIV_FILES[@] $MIMICIV_DIR
+download_files $MIMICIV_BASE_URL MIMICIV_FILES[@] $MIMICIV_DIR
 
 # Download MIMIC-IV notes
 download_files $MIMICIV_NOTE_BASE_URL MIMICIV_NOTE_FILES[@] $MIMICIV_DIR

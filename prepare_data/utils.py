@@ -370,6 +370,7 @@ class TextPreprocessor:
         self.convert_danish_characters = convert_danish_characters
 
     def __call__(self, df):
+        df = df.copy()  # Create a copy to avoid modifying the original DataFrame
         if self.lower:
             df[TEXT_COLUMN] = df[TEXT_COLUMN].str.lower()
         if self.convert_danish_characters:
@@ -396,12 +397,12 @@ class TextPreprocessor:
 
         df[TEXT_COLUMN] = df[TEXT_COLUMN].str.replace("\s+", " ", regex=True)
         df[TEXT_COLUMN] = df[TEXT_COLUMN].str.strip()
-        return df
+        return df  # Return the modified DataFrame
 
 
 def preprocess_documents(df: pd.DataFrame, preprocessor: TextPreprocessor) -> pd.DataFrame:
     df = df.copy()
-    df[TEXT_COLUMN] = df[TEXT_COLUMN].apply(preprocessor)
+    df = preprocessor(df)  # Apply the preprocessor to the entire DataFrame
     df['num_words'] = df[TEXT_COLUMN].str.count(' ') + 1
     df['num_targets'] = df[TARGET_COLUMN].apply(len)
     return df
